@@ -3,20 +3,30 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: FinSight - Personal financial tracker API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: profile
+    description: User profile and settings
+  - name: transactions
+    description: Income and expense transactions
+  - name: mood-logs
+    description: Emotional state logs linked to spending
+  - name: what-if
+    description: What-if financial scenario simulation
+  - name: insights
+    description: Aggregated insights, DNA, and dashboard summaries
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +34,689 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── Profile ────────────────────────────────────────────────────────────────
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get user profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+    patch:
+      operationId: updateProfile
+      tags: [profile]
+      summary: Update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  # ── Transactions ────────────────────────────────────────────────────────────
+  /transactions:
+    get:
+      operationId: listTransactions
+      tags: [transactions]
+      summary: List all transactions
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [income, expense]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+    post:
+      operationId: createTransaction
+      tags: [transactions]
+      summary: Create a transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionInput"
+      responses:
+        "201":
+          description: Created transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /transactions/{id}:
+    get:
+      operationId: getTransaction
+      tags: [transactions]
+      summary: Get a transaction by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateTransaction
+      tags: [transactions]
+      summary: Update a transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionUpdate"
+      responses:
+        "200":
+          description: Updated transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+    delete:
+      operationId: deleteTransaction
+      tags: [transactions]
+      summary: Delete a transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /transactions/{id}/regret:
+    patch:
+      operationId: rateTransactionRegret
+      tags: [transactions]
+      summary: Rate regret level for a past purchase (1-5)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegretRating"
+      responses:
+        "200":
+          description: Updated transaction with regret score
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  # ── Mood Logs ─────────────────────────────────────────────────────────────
+  /mood-logs:
+    get:
+      operationId: listMoodLogs
+      tags: [mood-logs]
+      summary: List mood logs
+      responses:
+        "200":
+          description: List of mood logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MoodLog"
+    post:
+      operationId: createMoodLog
+      tags: [mood-logs]
+      summary: Create a mood log entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MoodLogInput"
+      responses:
+        "201":
+          description: Created mood log
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MoodLog"
+
+  /mood-logs/{id}:
+    delete:
+      operationId: deleteMoodLog
+      tags: [mood-logs]
+      summary: Delete a mood log
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── What-If Scenarios ─────────────────────────────────────────────────────
+  /what-if:
+    get:
+      operationId: listScenarios
+      tags: [what-if]
+      summary: List saved what-if scenarios
+      responses:
+        "200":
+          description: List of scenarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Scenario"
+    post:
+      operationId: createScenario
+      tags: [what-if]
+      summary: Create and simulate a what-if scenario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScenarioInput"
+      responses:
+        "201":
+          description: Created scenario with simulation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scenario"
+
+  /what-if/{id}:
+    get:
+      operationId: getScenario
+      tags: [what-if]
+      summary: Get a scenario by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Scenario
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scenario"
+    delete:
+      operationId: deleteScenario
+      tags: [what-if]
+      summary: Delete a scenario
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── Insights / Dashboard ──────────────────────────────────────────────────
+  /insights/dashboard:
+    get:
+      operationId: getDashboardSummary
+      tags: [insights]
+      summary: Get dashboard summary (totals, trends, net worth delta)
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /insights/dna:
+    get:
+      operationId: getSpendingDna
+      tags: [insights]
+      summary: Get spending DNA — personalized behavioral fingerprint
+      responses:
+        "200":
+          description: Spending DNA analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpendingDna"
+
+  /insights/time-cost:
+    get:
+      operationId: getTimeCostBreakdown
+      tags: [insights]
+      summary: Get all expenses converted to hours of work
+      responses:
+        "200":
+          description: Time-cost breakdown of expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimeCostItem"
+
+  /insights/mood-correlation:
+    get:
+      operationId: getMoodCorrelation
+      tags: [insights]
+      summary: Get correlation between mood states and spending amounts
+      responses:
+        "200":
+          description: Mood vs spending correlation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MoodCorrelationPoint"
+
+  /insights/regret-analysis:
+    get:
+      operationId: getRegretAnalysis
+      tags: [insights]
+      summary: Get regret analysis — top regretted categories and patterns
+      responses:
+        "200":
+          description: Regret analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegretAnalysis"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    Profile:
+      type: object
+      required: [id, name, hourlyWage, currency, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        hourlyWage:
+          type: number
+          description: Used to convert expenses into hours of life spent
+        currency:
+          type: string
+          default: USD
+        monthlyIncomeGoal:
+          type: ["number", "null"]
+        monthlySavingsGoal:
+          type: ["number", "null"]
+        createdAt:
+          type: string
+
+    ProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        hourlyWage:
+          type: number
+        currency:
+          type: string
+        monthlyIncomeGoal:
+          type: ["number", "null"]
+        monthlySavingsGoal:
+          type: ["number", "null"]
+
+    Transaction:
+      type: object
+      required: [id, amount, type, category, description, date, createdAt]
+      properties:
+        id:
+          type: integer
+        amount:
+          type: number
+        type:
+          type: string
+          enum: [income, expense]
+        category:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+        regretScore:
+          type: ["integer", "null"]
+          description: 1 (no regret) to 5 (maximum regret) — user-rated after purchase
+        moodAtPurchase:
+          type: ["string", "null"]
+          description: Mood tag linked at time of transaction
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    TransactionInput:
+      type: object
+      required: [amount, type, category, description, date]
+      properties:
+        amount:
+          type: number
+          minimum: 0.01
+        type:
+          type: string
+          enum: [income, expense]
+        category:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+        moodAtPurchase:
+          type: string
+        notes:
+          type: string
+
+    TransactionUpdate:
+      type: object
+      properties:
+        amount:
+          type: number
+        type:
+          type: string
+          enum: [income, expense]
+        category:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+        moodAtPurchase:
+          type: string
+        notes:
+          type: string
+
+    RegretRating:
+      type: object
+      required: [score]
+      properties:
+        score:
+          type: integer
+          minimum: 1
+          maximum: 5
+        notes:
+          type: string
+
+    MoodLog:
+      type: object
+      required: [id, mood, note, loggedAt]
+      properties:
+        id:
+          type: integer
+        mood:
+          type: string
+          description: "One of: happy, calm, stressed, anxious, bored, sad, excited, angry"
+        note:
+          type: ["string", "null"]
+        spendingAmountToday:
+          type: ["number", "null"]
+          description: Auto-computed spending on this date
+        loggedAt:
+          type: string
+
+    MoodLogInput:
+      type: object
+      required: [mood]
+      properties:
+        mood:
+          type: string
+        note:
+          type: string
+
+    Scenario:
+      type: object
+      required: [id, name, changeDescription, monthlySavingsDelta, projectionYears, projectedSavings, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        changeDescription:
+          type: string
+          description: Human-readable description of what changes (e.g. "Cancel Netflix + cook at home 4x/week")
+        monthlySavingsDelta:
+          type: number
+          description: How much more (positive) or less (negative) would be saved per month
+        projectionYears:
+          type: integer
+          description: Number of years to project into the future
+        annualReturnRate:
+          type: number
+          description: Assumed annual investment return rate (e.g. 0.07 for 7%)
+        projectedSavings:
+          type: number
+          description: Total compounded savings at end of projection period
+        monthlyBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProjectionPoint"
+        createdAt:
+          type: string
+
+    ScenarioInput:
+      type: object
+      required: [name, changeDescription, monthlySavingsDelta, projectionYears]
+      properties:
+        name:
+          type: string
+        changeDescription:
+          type: string
+        monthlySavingsDelta:
+          type: number
+        projectionYears:
+          type: integer
+          minimum: 1
+          maximum: 40
+        annualReturnRate:
+          type: number
+          default: 0.07
+
+    ProjectionPoint:
+      type: object
+      required: [month, value]
+      properties:
+        month:
+          type: integer
+        value:
+          type: number
+
+    DashboardSummary:
+      type: object
+      required: [totalIncome, totalExpenses, netBalance, topCategory, transactionCount, avgDailySpend, savingsRate, currentMonthExpenses, currentMonthIncome]
+      properties:
+        totalIncome:
+          type: number
+        totalExpenses:
+          type: number
+        netBalance:
+          type: number
+        topCategory:
+          type: string
+        transactionCount:
+          type: integer
+        avgDailySpend:
+          type: number
+        savingsRate:
+          type: number
+          description: Percentage of income saved (0-100)
+        currentMonthExpenses:
+          type: number
+        currentMonthIncome:
+          type: number
+        categoryBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryStat"
+        recentTransactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+
+    CategoryStat:
+      type: object
+      required: [category, total, count, percentage]
+      properties:
+        category:
+          type: string
+        total:
+          type: number
+        count:
+          type: integer
+        percentage:
+          type: number
+
+    SpendingDna:
+      type: object
+      required: [dominantCategory, spendingPersonality, peakSpendingDay, impulseScore, consistencyScore, diversityScore, topPatterns]
+      properties:
+        dominantCategory:
+          type: string
+        spendingPersonality:
+          type: string
+          description: "e.g. 'The Comfort Seeker', 'The Impulse Artist', 'The Disciplined Saver'"
+        peakSpendingDay:
+          type: string
+          description: Day of week with highest average spend
+        impulseScore:
+          type: number
+          description: 0-100 score indicating impulsive spending tendency
+        consistencyScore:
+          type: number
+          description: 0-100 score for how consistent spending patterns are
+        diversityScore:
+          type: number
+          description: 0-100 score for how spread across categories spending is
+        topPatterns:
+          type: array
+          items:
+            type: string
+          description: Up to 5 detected behavioral patterns in plain language
+
+    TimeCostItem:
+      type: object
+      required: [transactionId, description, amount, hoursOfWork, category, date]
+      properties:
+        transactionId:
+          type: integer
+        description:
+          type: string
+        amount:
+          type: number
+        hoursOfWork:
+          type: number
+          description: amount / hourlyWage
+        category:
+          type: string
+        date:
+          type: string
+
+    MoodCorrelationPoint:
+      type: object
+      required: [mood, avgSpend, count, totalSpend]
+      properties:
+        mood:
+          type: string
+        avgSpend:
+          type: number
+        count:
+          type: integer
+        totalSpend:
+          type: number
+
+    RegretAnalysis:
+      type: object
+      required: [avgRegretScore, mostRegrettedCategory, leastRegrettedCategory, totalRegretted, regretByCategory, topRegrettedTransactions]
+      properties:
+        avgRegretScore:
+          type: number
+        mostRegrettedCategory:
+          type: string
+        leastRegrettedCategory:
+          type: string
+        totalRegretted:
+          type: number
+          description: Total money spent on transactions with regret score >= 4
+        regretByCategory:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryRegretStat"
+        topRegrettedTransactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+
+    CategoryRegretStat:
+      type: object
+      required: [category, avgRegretScore, count]
+      properties:
+        category:
+          type: string
+        avgRegretScore:
+          type: number
+        count:
+          type: integer
