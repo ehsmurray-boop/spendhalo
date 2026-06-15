@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout";
+import { ProProvider } from "@/hooks/use-pro";
 import NotFound from "@/pages/not-found";
 
 import Dashboard from "@/pages/dashboard";
@@ -13,6 +14,7 @@ import Mood from "@/pages/mood";
 import Dna from "@/pages/dna";
 import Regret from "@/pages/regret";
 import Settings from "@/pages/settings";
+import Upgrade from "@/pages/upgrade";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +30,7 @@ function Router() {
         <Route path="/dna" component={Dna} />
         <Route path="/regret" component={Regret} />
         <Route path="/settings" component={Settings} />
+        <Route path="/upgrade" component={Upgrade} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
@@ -39,7 +42,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
+          <ProProvider>
+            <Router />
+          </ProProvider>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

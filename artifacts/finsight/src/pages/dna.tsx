@@ -4,12 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { BrainCircuit, Lightbulb, Zap, RefreshCw } from "lucide-react";
+import { ProGate } from "@/components/pro-gate";
 
-export default function Dna() {
+function DnaContent() {
   const { data: dna, isLoading } = useGetSpendingDna();
 
   if (isLoading) return <Skeleton className="h-[400px] w-full" />;
-
   if (!dna) return <div>No DNA data available</div>;
 
   return (
@@ -27,68 +27,60 @@ export default function Dna() {
               <div className="text-sm uppercase tracking-widest text-muted-foreground font-semibold mb-1">Your Spending Personality</div>
               <div className="text-3xl font-serif font-bold text-foreground">{dna.spendingPersonality}</div>
             </div>
-            <div className="text-muted-foreground">
-              Peak Spending Day: <span className="font-semibold text-foreground capitalize">{dna.peakSpendingDay}</span>
-            </div>
-            <div className="text-muted-foreground">
-              Dominant Category: <span className="font-semibold text-foreground">{dna.dominantCategory}</span>
-            </div>
+            <div className="text-muted-foreground text-sm">Dominant category: <span className="font-semibold text-foreground">{dna.dominantCategory}</span></div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Behavioral Traits</CardTitle>
-            <CardDescription>0-100 scores analyzing your habits</CardDescription>
+            <CardTitle className="text-base font-semibold">Behavioral Scores</CardTitle>
+            <CardDescription>How your spending patterns break down</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-orange-500" /> Impulse Score</span>
-                <span className="font-bold">{dna.impulseScore}</span>
+          <CardContent className="space-y-5">
+            {[
+              { label: "Impulse Score", value: dna.impulseScore, desc: "Tendency for small, unplanned purchases" },
+              { label: "Consistency", value: dna.consistencyScore, desc: "How regular your spending patterns are" },
+              { label: "Diversity", value: dna.diversityScore, desc: "How spread across categories you spend" },
+            ].map(({ label, value, desc }) => (
+              <div key={label} className="space-y-1.5">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-sm font-medium">{label}</span>
+                  <span className="text-sm font-bold text-foreground">{value}/100</span>
+                </div>
+                <Progress value={value} className="h-2" />
+                <p className="text-xs text-muted-foreground">{desc}</p>
               </div>
-              <Progress value={dna.impulseScore} className="h-2" />
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="flex items-center gap-2"><RefreshCw className="w-4 h-4 text-blue-500" /> Consistency</span>
-                <span className="font-bold">{dna.consistencyScore}</span>
-              </div>
-              <Progress value={dna.consistencyScore} className="h-2" />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="flex items-center gap-2"><Lightbulb className="w-4 h-4 text-green-500" /> Diversity</span>
-                <span className="font-bold">{dna.diversityScore}</span>
-              </div>
-              <Progress value={dna.diversityScore} className="h-2" />
-            </div>
+            ))}
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Detected Patterns</CardTitle>
-          <CardDescription>What the data says about you</CardDescription>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Lightbulb className="w-4 h-4 text-primary" /> Detected Patterns
+          </CardTitle>
+          <CardDescription>Peak spending day: <span className="font-semibold text-foreground">{dna.peakSpendingDay}</span></CardDescription>
         </CardHeader>
         <CardContent>
-          {dna.topPatterns && dna.topPatterns.length > 0 ? (
-            <ul className="space-y-4">
-              {dna.topPatterns.map((pattern, i) => (
-                <li key={i} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                  <div className="mt-1 w-2 h-2 rounded-full bg-primary flex-shrink-0" />
-                  <span className="text-foreground leading-relaxed">{pattern}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="text-center text-muted-foreground p-4">Not enough data to detect meaningful patterns yet.</div>
-          )}
+          <ul className="space-y-3">
+            {dna.topPatterns.map((pattern, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm">
+                <Zap className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <span>{pattern}</span>
+              </li>
+            ))}
+          </ul>
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function Dna() {
+  return (
+    <ProGate feature="Spending DNA" description="See your unique behavioral fingerprint — spending personality, impulse score, peak spending day, and detected patterns.">
+      <DnaContent />
+    </ProGate>
   );
 }

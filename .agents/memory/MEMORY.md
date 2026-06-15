@@ -1,0 +1,1 @@
+- [Stripe Replit connector field names](stripe-connector-fields.md) — credentials API returns `settings.secret` not `settings.secret_key`; stripe tables use `_raw_data` JSONB

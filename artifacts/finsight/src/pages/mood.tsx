@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { ProGate } from "@/components/pro-gate";
 import { useListMoodLogs, useCreateMoodLog, useGetMoodCorrelation, getListMoodLogsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -10,7 +11,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveCont
 
 const MOODS = ["happy", "calm", "stressed", "anxious", "bored", "sad", "excited", "angry"];
 
-export default function Mood() {
+function MoodContent() {
   const { data: logs, isLoading: loadingLogs } = useListMoodLogs();
   const { data: correlation, isLoading: loadingCorr } = useGetMoodCorrelation();
   const createMutation = useCreateMoodLog();
@@ -115,5 +116,13 @@ export default function Mood() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function Mood() {
+  return (
+    <ProGate feature="Mood & Money" description="Correlate your emotional state with spending patterns to understand the triggers behind your financial decisions.">
+      <MoodContent />
+    </ProGate>
   );
 }

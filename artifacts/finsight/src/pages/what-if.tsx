@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { ProGate } from "@/components/pro-gate";
 import { useListScenarios, useCreateScenario, useDeleteScenario, getListScenariosQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -10,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { Trash2 } from "lucide-react";
 
-export default function WhatIf() {
+function WhatIfContent() {
   const { data: scenarios, isLoading } = useListScenarios();
   const deleteMutation = useDeleteScenario();
   const createMutation = useCreateScenario();
@@ -147,5 +148,13 @@ export default function WhatIf() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WhatIf() {
+  return (
+    <ProGate feature="What-If Simulator" description="Model compound growth and simulate what life decisions would look like if you invested that money instead.">
+      <WhatIfContent />
+    </ProGate>
   );
 }

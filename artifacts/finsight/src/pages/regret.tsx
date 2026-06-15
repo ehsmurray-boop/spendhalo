@@ -1,4 +1,5 @@
 import React from "react";
+import { ProGate } from "@/components/pro-gate";
 import { useGetRegretAnalysis, useRateTransactionRegret, getGetRegretAnalysisQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -6,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export default function Regret() {
+function RegretContent() {
   const { data: analysis, isLoading } = useGetRegretAnalysis();
   const rateMutation = useRateTransactionRegret();
   const queryClient = useQueryClient();
@@ -133,5 +134,13 @@ export default function Regret() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function Regret() {
+  return (
+    <ProGate feature="Regret Analysis" description="Rate past purchases and discover which categories you consistently regret — so you can stop making the same costly mistakes.">
+      <RegretContent />
+    </ProGate>
   );
 }
