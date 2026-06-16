@@ -15,25 +15,31 @@ import Dna from "@/pages/dna";
 import Regret from "@/pages/regret";
 import Settings from "@/pages/settings";
 import Upgrade from "@/pages/upgrade";
+import Privacy from "@/pages/privacy";
 
 const queryClient = new QueryClient();
 
 function Router() {
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/transactions" component={Transactions} />
-        <Route path="/time-cost" component={TimeCost} />
-        <Route path="/what-if" component={WhatIf} />
-        <Route path="/mood" component={Mood} />
-        <Route path="/dna" component={Dna} />
-        <Route path="/regret" component={Regret} />
-        <Route path="/settings" component={Settings} />
-        <Route path="/upgrade" component={Upgrade} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <Switch>
+      <Route path="/privacy" component={Privacy} />
+      <Route>
+        <Layout>
+          <Switch>
+            <Route path="/" component={Dashboard} />
+            <Route path="/transactions" component={Transactions} />
+            <Route path="/time-cost" component={TimeCost} />
+            <Route path="/what-if" component={WhatIf} />
+            <Route path="/mood" component={Mood} />
+            <Route path="/dna" component={Dna} />
+            <Route path="/regret" component={Regret} />
+            <Route path="/settings" component={Settings} />
+            <Route path="/upgrade" component={Upgrade} />
+            <Route component={NotFound} />
+          </Switch>
+        </Layout>
+      </Route>
+    </Switch>
   );
 }
 

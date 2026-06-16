@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "FinSight"
+title = "SpendHalo"
 version = "1.0.0"
 id = "artifacts/finsight"
 router = "path"
