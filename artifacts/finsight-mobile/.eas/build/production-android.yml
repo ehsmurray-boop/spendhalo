@@ -7,12 +7,13 @@ build:
         command: npm install -g pnpm@10.26.1
     - run:
         name: Install dependencies
+        working_directory: ../..
         command: pnpm install --no-frozen-lockfile
     - run:
         name: Run Expo prebuild
-        working_directory: artifacts/finsight-mobile
         command: npx expo prebuild --platform android --non-interactive
     - run:
         name: Reinstall after prebuild
+        working_directory: ../..
         command: pnpm install --no-frozen-lockfile
     - eas/run_gradle
