@@ -11,7 +11,7 @@ build:
         command: pnpm install --no-frozen-lockfile
     - run:
         name: Run Expo prebuild
-        command: npx expo prebuild --platform android --non-interactive
+        command: CI=1 npx expo prebuild --platform android
     - run:
         name: Reinstall after prebuild
         working_directory: ../..
