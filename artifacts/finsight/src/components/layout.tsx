@@ -44,9 +44,9 @@ export function Layout({ children }: { children: ReactNode }) {
       <aside className="w-full md:w-64 bg-sidebar border-r border-sidebar-border p-4 flex flex-col gap-4 sticky top-0 md:h-screen z-10 overflow-y-auto">
         <div className="flex items-center gap-2 px-2 py-4">
           <div className="w-8 h-8 rounded bg-primary text-primary-foreground flex items-center justify-center font-serif font-bold italic">
-            F
+            S
           </div>
-          <span className="text-xl font-serif font-semibold tracking-tight text-sidebar-foreground">FinSight</span>
+          <span className="text-xl font-serif font-semibold tracking-tight text-sidebar-foreground">SpendHalo</span>
         </div>
 
         <nav className="flex-1 flex flex-col gap-1">

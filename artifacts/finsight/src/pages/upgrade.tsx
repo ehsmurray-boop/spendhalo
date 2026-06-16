@@ -90,7 +90,7 @@ export default function Upgrade() {
           <Sparkles className="w-7 h-7 text-primary" />
         </div>
         <h1 className="text-3xl font-serif font-semibold">You're on Pro</h1>
-        <p className="text-muted-foreground">All features are unlocked. Enjoy the full FinSight experience.</p>
+        <p className="text-muted-foreground">All features are unlocked. Enjoy the full SpendHalo experience.</p>
         <div className="flex gap-3 justify-center">
           <Button variant="outline" onClick={() => setLocation("/")} data-testid="btn-go-home">
             Back to Dashboard
@@ -108,7 +108,7 @@ export default function Upgrade() {
       {/* Header */}
       <div className="text-center space-y-3">
         <Badge variant="secondary" className="gap-1 text-xs px-3 py-1">
-          <Zap className="w-3 h-3" /> FinSight Pro
+          <Zap className="w-3 h-3" /> SpendHalo Pro
         </Badge>
         <h1 className="text-4xl font-serif font-semibold text-foreground">
           Understand your money at a deeper level

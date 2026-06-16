@@ -69,7 +69,7 @@ router.post('/stripe/checkout', async (req, res): Promise<void> => {
   // Create or reuse Stripe customer
   let customerId = user.stripeCustomerId;
   if (!customerId) {
-    const customer = await stripeService.createCustomer(email ?? `${userId}@finsight.app`, userId);
+    const customer = await stripeService.createCustomer(email ?? `${userId}@spendhalo.app`, userId);
     user = await storage.updateUserStripeInfo(userId, { stripeCustomerId: customer.id });
     customerId = customer.id;
   }

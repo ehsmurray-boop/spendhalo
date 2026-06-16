@@ -1,6 +1,6 @@
-# [Project name]
+# SpendHalo
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Personal finance tracker with behavioral insights — time cost, regret scoring, Spending DNA, mood-money correlation, What-If Simulator, and a no-spend streak. Available as a web app and Expo mobile companion. Domain: spendhalo.app
 
 ## Run & Operate
 

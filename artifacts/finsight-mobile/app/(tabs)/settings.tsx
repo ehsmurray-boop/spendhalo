@@ -101,7 +101,7 @@ export default function SettingsScreen() {
             <Feather name="star" size={18} color={colors.primaryForeground} />
             <View style={styles.proBannerText}>
               <Text style={[styles.proBannerTitle, { color: colors.primaryForeground }]}>
-                FinSight Pro
+                SpendHalo Pro
               </Text>
               <Text style={[styles.proBannerSub, { color: `${colors.primaryForeground}99` }]}>
                 All features unlocked

@@ -78,7 +78,7 @@ export default function UpgradeScreen() {
             You're already Pro!
           </Text>
           <Text style={[styles.alreadyProSub, { color: colors.mutedForeground }]}>
-            All features are unlocked. Enjoy FinSight Pro.
+            All features are unlocked. Enjoy SpendHalo Pro.
           </Text>
         </View>
       </View>
@@ -106,7 +106,7 @@ export default function UpgradeScreen() {
       >
         <View style={[styles.hero, { backgroundColor: colors.primary }]}>
           <Feather name="star" size={36} color={colors.primaryForeground} />
-          <Text style={[styles.heroTitle, { color: colors.primaryForeground }]}>FinSight Pro</Text>
+          <Text style={[styles.heroTitle, { color: colors.primaryForeground }]}>SpendHalo Pro</Text>
           <Text style={[styles.heroSub, { color: `${colors.primaryForeground}99` }]}>
             Unlock powerful financial insights
           </Text>
@@ -182,7 +182,7 @@ export default function UpgradeScreen() {
         </TouchableOpacity>
 
         <Text style={[styles.disclaimer, { color: colors.mutedForeground }]}>
-          Subscription is managed on the FinSight web app. You'll be taken to a secure Stripe checkout.
+          Subscription is managed on the SpendHalo web app. You'll be taken to a secure Stripe checkout.
         </Text>
       </ScrollView>
     </View>

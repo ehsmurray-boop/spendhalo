@@ -26,7 +26,7 @@ export function ProGate({ children, feature, description }: ProGateProps) {
         {feature} is a Pro feature
       </h2>
       <p className="text-muted-foreground max-w-sm mb-8 leading-relaxed">
-        {description ?? "Upgrade to FinSight Pro to unlock this feature and all behavioral insights."}
+        {description ?? "Upgrade to SpendHalo Pro to unlock this feature and all behavioral insights."}
       </p>
       <Button
         size="lg"

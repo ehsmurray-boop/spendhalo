@@ -3,14 +3,14 @@ import { getUncachableStripeClient } from './stripeClient';
 async function createProducts() {
   try {
     const stripe = await getUncachableStripeClient();
-    console.log('Creating FinSight Pro products in Stripe...');
+    console.log('Creating SpendHalo Pro products in Stripe...');
 
     // Check if already exists
     const existing = await stripe.products.search({
-      query: "name:'FinSight Pro' AND active:'true'"
+      query: "name:'SpendHalo Pro' AND active:'true'"
     });
     if (existing.data.length > 0) {
-      console.log('FinSight Pro already exists:', existing.data[0].id);
+      console.log('SpendHalo Pro already exists:', existing.data[0].id);
       // List its prices
       const prices = await stripe.prices.list({ product: existing.data[0].id, active: true });
       prices.data.forEach(p => {
@@ -20,7 +20,7 @@ async function createProducts() {
     }
 
     const product = await stripe.products.create({
-      name: 'FinSight Pro',
+      name: 'SpendHalo Pro',
       description: 'Unlock Spending DNA, Regret Analysis, What-If Simulator, Mood & Money correlation, and unlimited transactions.',
       metadata: { tier: 'pro' },
     });
