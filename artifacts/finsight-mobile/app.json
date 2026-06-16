@@ -14,7 +14,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "app.spendhalo.mobile"
     },
     "android": {
       "package": "app.spendhalo.mobile",
