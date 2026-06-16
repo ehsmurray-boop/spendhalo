@@ -18,7 +18,6 @@
       }
     },
     "production": {
-      "config": "production-android.yml",
       "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
