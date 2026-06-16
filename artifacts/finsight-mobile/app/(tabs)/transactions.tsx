@@ -4,8 +4,9 @@ import { useRouter } from "expo-router";
 import {
   useDeleteTransaction,
   useListTransactions,
+  useRateTransactionRegret,
 } from "@workspace/api-client-react";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -17,6 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -26,6 +28,67 @@ import type { Transaction } from "@workspace/api-client-react";
 
 const FILTERS = ["All", "Income", "Expense"] as const;
 type Filter = (typeof FILTERS)[number];
+
+function SwipeableRow({
+  transaction,
+  onPress,
+  onDelete,
+  onRegret,
+}: {
+  transaction: Transaction;
+  onPress: () => void;
+  onDelete: () => void;
+  onRegret: (score: number) => void;
+}) {
+  const colors = useColors();
+  const swipeRef = useRef<Swipeable>(null);
+
+  function handleRegretAction() {
+    swipeRef.current?.close();
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Alert.alert(
+      "Rate Regret",
+      `"${transaction.description}" — how much do you regret this?`,
+      [
+        { text: "★☆☆☆☆  No regret", onPress: () => onRegret(1) },
+        { text: "★★☆☆☆  A little", onPress: () => onRegret(2) },
+        { text: "★★★☆☆  Some", onPress: () => onRegret(3) },
+        { text: "★★★★☆  Quite a bit", onPress: () => onRegret(4) },
+        { text: "★★★★★  Major regret", onPress: () => onRegret(5) },
+        { text: "Cancel", style: "cancel" },
+      ]
+    );
+  }
+
+  const rightActions =
+    transaction.type === "expense"
+      ? () => (
+          <TouchableOpacity
+            style={[styles.regretAction, { backgroundColor: "#B07010" }]}
+            onPress={handleRegretAction}
+            activeOpacity={0.9}
+          >
+            <Feather name="star" size={20} color="#fff" />
+            <Text style={styles.regretActionText}>Rate</Text>
+          </TouchableOpacity>
+        )
+      : undefined;
+
+  return (
+    <Swipeable
+      ref={swipeRef}
+      renderRightActions={rightActions}
+      overshootRight={false}
+      friction={2}
+    >
+      <TransactionRow
+        transaction={transaction}
+        onPress={onPress}
+        onLongPress={onDelete}
+      />
+    </Swipeable>
+  );
+}
 
 export default function TransactionsScreen() {
   const colors = useColors();
@@ -48,25 +111,27 @@ export default function TransactionsScreen() {
 
   const deleteMutation = useDeleteTransaction({
     mutation: {
+      onSuccess: () => void queryClient.invalidateQueries(),
+    },
+  });
+
+  const regretMutation = useRateTransactionRegret({
+    mutation: {
       onSuccess: () => {
         void queryClient.invalidateQueries();
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       },
     },
   });
 
-  const filtered = transactions?.filter((t) => {
+  const filtered = (transactions ?? []).filter((t) => {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
       t.description.toLowerCase().includes(q) ||
       t.category.toLowerCase().includes(q)
     );
-  }) ?? [];
-
-  function handleAdd() {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/add-transaction");
-  }
+  });
 
   function handleDelete(txn: Transaction) {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -78,6 +143,10 @@ export default function TransactionsScreen() {
         onPress: () => deleteMutation.mutate({ id: txn.id }),
       },
     ]);
+  }
+
+  function handleRegret(txn: Transaction, score: number) {
+    regretMutation.mutate({ id: txn.id, data: { score } });
   }
 
   return (
@@ -95,7 +164,10 @@ export default function TransactionsScreen() {
         <Text style={[styles.title, { color: colors.foreground }]}>Transactions</Text>
         <TouchableOpacity
           style={[styles.addBtn, { backgroundColor: colors.primary }]}
-          onPress={handleAdd}
+          onPress={() => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/add-transaction");
+          }}
           activeOpacity={0.8}
         >
           <Feather name="plus" size={20} color={colors.primaryForeground} />
@@ -108,7 +180,12 @@ export default function TransactionsScreen() {
           { backgroundColor: colors.background, borderBottomColor: colors.border },
         ]}
       >
-        <View style={[styles.searchBar, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+        <View
+          style={[
+            styles.searchBar,
+            { backgroundColor: colors.muted, borderColor: colors.border },
+          ]}
+        >
           <Feather name="search" size={16} color={colors.mutedForeground} />
           <TextInput
             style={[styles.searchInput, { color: colors.foreground }]}
@@ -123,7 +200,6 @@ export default function TransactionsScreen() {
             </TouchableOpacity>
           )}
         </View>
-
         <View style={styles.filters}>
           {FILTERS.map((f) => (
             <TouchableOpacity
@@ -154,9 +230,11 @@ export default function TransactionsScreen() {
         data={filtered}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <TransactionRow
+          <SwipeableRow
             transaction={item}
-            onLongPress={() => handleDelete(item)}
+            onPress={() => router.push(`/transaction/${item.id}`)}
+            onDelete={() => handleDelete(item)}
+            onRegret={(score) => handleRegret(item, score)}
           />
         )}
         refreshControl={
@@ -167,19 +245,18 @@ export default function TransactionsScreen() {
           />
         }
         scrollEnabled={!!filtered.length}
-        contentContainerStyle={[
-          styles.list,
-          { paddingBottom: bottomInset + 100 },
-        ]}
+        contentContainerStyle={[styles.list, { paddingBottom: bottomInset + 100 }]}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Feather name="inbox" size={32} color={colors.mutedForeground} />
             <Text style={[styles.emptyTitle, { color: colors.foreground }]}>
               {isLoading ? "Loading..." : "No transactions"}
             </Text>
-            <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
-              {isLoading ? "" : "Tap + to add your first one"}
-            </Text>
+            {!isLoading && (
+              <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
+                Tap + to add one · Swipe left to rate regret
+              </Text>
+            )}
           </View>
         }
       />
@@ -188,9 +265,7 @@ export default function TransactionsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -199,10 +274,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  title: {
-    fontSize: 28,
-    fontFamily: "Inter_700Bold",
-  },
+  title: { fontSize: 28, fontFamily: "Inter_700Bold" },
   addBtn: {
     width: 40,
     height: 40,
@@ -225,41 +297,28 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     gap: 8,
   },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    fontFamily: "Inter_400Regular",
-  },
-  filters: {
-    flexDirection: "row",
-    gap: 8,
-  },
+  searchInput: { flex: 1, fontSize: 15, fontFamily: "Inter_400Regular" },
+  filters: { flexDirection: "row", gap: 8 },
   filterChip: {
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
   },
-  filterText: {
-    fontSize: 13,
-    fontFamily: "Inter_500Medium",
-  },
-  list: {
-    flexGrow: 1,
-  },
-  empty: {
+  filterText: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  list: { flexGrow: 1 },
+  empty: { alignItems: "center", justifyContent: "center", paddingTop: 80, gap: 8 },
+  emptyTitle: { fontSize: 16, fontFamily: "Inter_600SemiBold", marginTop: 4 },
+  emptyText: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center" },
+  regretAction: {
+    width: 72,
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 80,
-    gap: 8,
+    gap: 4,
   },
-  emptyTitle: {
-    fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
-    marginTop: 4,
-  },
-  emptyText: {
-    fontSize: 14,
-    fontFamily: "Inter_400Regular",
+  regretActionText: {
+    color: "#fff",
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
   },
 });

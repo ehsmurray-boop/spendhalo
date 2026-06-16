@@ -25,14 +25,8 @@ import { usePro } from "@/context/ProContext";
 import { useColors } from "@/hooks/useColors";
 
 const MOOD_EMOJI: Record<string, string> = {
-  happy: "😊",
-  calm: "😌",
-  stressed: "😰",
-  anxious: "😟",
-  bored: "😑",
-  sad: "😢",
-  excited: "🤩",
-  angry: "😠",
+  happy: "😊", calm: "😌", stressed: "😰", anxious: "😟",
+  bored: "😑", sad: "😢", excited: "🤩", angry: "😠",
 };
 
 export default function InsightsScreen() {
@@ -90,9 +84,8 @@ export default function InsightsScreen() {
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Time Cost</Text>
           </View>
           <Text style={[styles.sectionSubtitle, { color: colors.mutedForeground }]}>
-            At ${hourlyWage}/hr — your purchases in hours of work
+            At ${hourlyWage}/hr — purchases as hours of your life
           </Text>
-
           {tcLoading ? (
             <ActivityIndicator color={colors.primary} style={styles.loader} />
           ) : topTimeCostItems.length === 0 ? (
@@ -101,7 +94,10 @@ export default function InsightsScreen() {
             </Text>
           ) : (
             topTimeCostItems.map((item) => (
-              <View key={item.transactionId} style={[styles.timeCostRow, { borderTopColor: colors.border }]}>
+              <View
+                key={item.transactionId}
+                style={[styles.timeCostRow, { borderTopColor: colors.border }]}
+              >
                 <View style={styles.timeCostInfo}>
                   <Text style={[styles.timeCostDesc, { color: colors.foreground }]} numberOfLines={1}>
                     {item.description}
@@ -125,7 +121,7 @@ export default function InsightsScreen() {
 
         <ProGate
           title="Spending DNA"
-          description="Discover your spending personality, peak spending days, and behavioral patterns."
+          description="Discover your spending personality, peak days, and behavioral patterns."
         >
           {dna && (
             <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -134,9 +130,7 @@ export default function InsightsScreen() {
                 <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Spending DNA</Text>
               </View>
               <View style={[styles.dnaPersonality, { backgroundColor: colors.accent }]}>
-                <Text style={[styles.dnaPersonalityLabel, { color: colors.mutedForeground }]}>
-                  You are
-                </Text>
+                <Text style={[styles.dnaPersonalityLabel, { color: colors.mutedForeground }]}>You are</Text>
                 <Text style={[styles.dnaPersonalityText, { color: colors.primary }]}>
                   {dna.spendingPersonality}
                 </Text>
@@ -148,12 +142,14 @@ export default function InsightsScreen() {
                   { label: "Diversity", value: dna.diversityScore },
                 ].map((s) => (
                   <View key={s.label} style={styles.dnaScore}>
-                    <Text style={[styles.dnaScoreLabel, { color: colors.mutedForeground }]}>
-                      {s.label}
-                    </Text>
-                    <Text style={[styles.dnaScoreValue, { color: colors.foreground }]}>
-                      {s.value.toFixed(0)}
-                    </Text>
+                    <View style={styles.dnaScoreRow}>
+                      <Text style={[styles.dnaScoreLabel, { color: colors.mutedForeground }]}>
+                        {s.label}
+                      </Text>
+                      <Text style={[styles.dnaScoreValue, { color: colors.foreground }]}>
+                        {s.value.toFixed(0)}
+                      </Text>
+                    </View>
                     <View style={[styles.dnaBar, { backgroundColor: colors.muted }]}>
                       <View
                         style={[
@@ -180,7 +176,7 @@ export default function InsightsScreen() {
 
         <ProGate
           title="Regret Analysis"
-          description="See which purchases you regret most and identify patterns in spending you wish you hadn't."
+          description="See which purchases you regret most and identify costly patterns."
         >
           {regret && (
             <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -193,23 +189,17 @@ export default function InsightsScreen() {
                   <Text style={[styles.regretStatValue, { color: colors.foreground }]}>
                     {regret.avgRegretScore.toFixed(1)}/5
                   </Text>
-                  <Text style={[styles.regretStatLabel, { color: colors.mutedForeground }]}>
-                    Avg Regret
-                  </Text>
+                  <Text style={[styles.regretStatLabel, { color: colors.mutedForeground }]}>Avg Regret</Text>
                 </View>
                 <View style={styles.regretStat}>
                   <Text style={[styles.regretStatValue, { color: colors.expense }]}>
                     ${regret.totalRegretted.toFixed(0)}
                   </Text>
-                  <Text style={[styles.regretStatLabel, { color: colors.mutedForeground }]}>
-                    Regretted $
-                  </Text>
+                  <Text style={[styles.regretStatLabel, { color: colors.mutedForeground }]}>Regretted $</Text>
                 </View>
               </View>
               <View style={[styles.regretCategory, { backgroundColor: colors.expenseBackground }]}>
-                <Text style={[styles.regretCatLabel, { color: colors.mutedForeground }]}>
-                  Most Regretted
-                </Text>
+                <Text style={[styles.regretCatLabel, { color: colors.mutedForeground }]}>Most Regretted</Text>
                 <Text style={[styles.regretCatValue, { color: colors.expense }]}>
                   {regret.mostRegrettedCategory}
                 </Text>
@@ -220,7 +210,7 @@ export default function InsightsScreen() {
 
         <ProGate
           title="Mood & Money"
-          description="Understand how your emotional state influences how much you spend."
+          description="Understand how your emotional state drives spending decisions."
         >
           {mood && mood.length > 0 && (
             <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -250,15 +240,17 @@ export default function InsightsScreen() {
 
         <TouchableOpacity
           style={[styles.whatIfBanner, { backgroundColor: colors.accent, borderColor: colors.border }]}
-          onPress={() => isPro ? null : router.push("/upgrade")}
+          onPress={() => isPro ? router.push("/what-if") : router.push("/upgrade")}
           activeOpacity={0.8}
         >
-          <Feather name={isPro ? "trending-up" : "lock"} size={20} color={colors.primary} />
+          <View style={[styles.whatIfIcon, { backgroundColor: colors.primary }]}>
+            <Feather name="trending-up" size={18} color={colors.primaryForeground} />
+          </View>
           <View style={styles.whatIfText}>
             <Text style={[styles.whatIfTitle, { color: colors.primary }]}>What-If Simulator</Text>
             <Text style={[styles.whatIfSub, { color: colors.mutedForeground }]}>
               {isPro
-                ? "Simulate financial scenarios and project savings"
+                ? "Project your savings with scenario simulations →"
                 : "Upgrade to Pro to simulate financial scenarios"}
             </Text>
           </View>
@@ -273,12 +265,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { paddingHorizontal: 16, gap: 12 },
   title: { fontSize: 28, fontFamily: "Inter_700Bold" },
-  section: {
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    overflow: "hidden",
-    paddingBottom: 8,
-  },
+  section: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, overflow: "hidden", paddingBottom: 8 },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -295,12 +282,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   loader: { marginVertical: 16 },
-  emptyText: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-    textAlign: "center",
-    padding: 16,
-  },
+  emptyText: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", padding: 16 },
   timeCostRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -314,50 +296,24 @@ const styles = StyleSheet.create({
   timeCostRight: { alignItems: "flex-end", gap: 2 },
   timeCostHours: { fontSize: 16, fontFamily: "Inter_700Bold" },
   timeCostAmount: { fontSize: 11, fontFamily: "Inter_400Regular" },
-  dnaPersonality: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-    borderRadius: 10,
-    padding: 14,
-    gap: 4,
-  },
+  dnaPersonality: { marginHorizontal: 16, marginBottom: 12, borderRadius: 10, padding: 14, gap: 4 },
   dnaPersonalityLabel: { fontSize: 11, fontFamily: "Inter_400Regular" },
   dnaPersonalityText: { fontSize: 17, fontFamily: "Inter_600SemiBold" },
-  dnaScores: {
-    paddingHorizontal: 16,
-    gap: 10,
-    marginBottom: 12,
-  },
+  dnaScores: { paddingHorizontal: 16, gap: 10, marginBottom: 12 },
   dnaScore: { gap: 4 },
+  dnaScoreRow: { flexDirection: "row", justifyContent: "space-between" },
   dnaScoreLabel: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  dnaScoreValue: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  dnaScoreValue: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
   dnaBar: { height: 6, borderRadius: 3, overflow: "hidden" },
   dnaBarFill: { height: 6, borderRadius: 3 },
-  patterns: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    paddingHorizontal: 16,
-    gap: 6,
-    paddingBottom: 4,
-  },
+  patterns: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 16, gap: 6, paddingBottom: 4 },
   patternChip: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
   patternText: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  regretStats: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 24,
-  },
+  regretStats: { flexDirection: "row", paddingHorizontal: 16, paddingVertical: 12, gap: 24 },
   regretStat: { gap: 2 },
   regretStatValue: { fontSize: 22, fontFamily: "Inter_700Bold" },
   regretStatLabel: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  regretCategory: {
-    marginHorizontal: 16,
-    marginBottom: 8,
-    borderRadius: 10,
-    padding: 12,
-    gap: 4,
-  },
+  regretCategory: { marginHorizontal: 16, marginBottom: 8, borderRadius: 10, padding: 12, gap: 4 },
   regretCatLabel: { fontSize: 11, fontFamily: "Inter_400Regular" },
   regretCatValue: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
   moodRow: {
@@ -381,6 +337,7 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 12,
   },
+  whatIfIcon: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
   whatIfText: { flex: 1, gap: 2 },
   whatIfTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
   whatIfSub: { fontSize: 12, fontFamily: "Inter_400Regular" },

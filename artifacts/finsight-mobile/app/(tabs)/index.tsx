@@ -16,13 +16,13 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MetricCard } from "@/components/MetricCard";
+import { SpendingChart } from "@/components/SpendingChart";
+import { StreakCard } from "@/components/StreakCard";
 import { TransactionRow } from "@/components/TransactionRow";
 import { useColors } from "@/hooks/useColors";
 
 function formatCurrency(amount: number): string {
-  if (amount >= 1000) {
-    return `$${(amount / 1000).toFixed(1)}k`;
-  }
+  if (amount >= 1000) return `$${(amount / 1000).toFixed(1)}k`;
   return `$${amount.toFixed(0)}`;
 }
 
@@ -38,7 +38,7 @@ export default function DashboardScreen() {
     isRefetching,
   } = useGetDashboardSummary();
 
-  const { data: transactions } = useListTransactions({ limit: 5 });
+  const { data: transactions, refetch: refetchTxns } = useListTransactions({ limit: 200 });
 
   const topInset = Platform.OS === "web" ? 67 : insets.top;
   const bottomInset = Platform.OS === "web" ? 34 : 0;
@@ -51,6 +51,13 @@ export default function DashboardScreen() {
     router.push("/add-transaction");
   }
 
+  function handleRefresh() {
+    void refetch();
+    void refetchTxns();
+  }
+
+  const recentTransactions = transactions?.slice(0, 5) ?? [];
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
@@ -62,7 +69,7 @@ export default function DashboardScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
-            onRefresh={() => void refetch()}
+            onRefresh={handleRefresh}
             tintColor={colors.primary}
           />
         }
@@ -87,12 +94,7 @@ export default function DashboardScreen() {
           <ActivityIndicator color={colors.primary} style={styles.loader} />
         ) : (
           <>
-            <View
-              style={[
-                styles.balanceCard,
-                { backgroundColor: colors.primary },
-              ]}
-            >
+            <View style={[styles.balanceCard, { backgroundColor: colors.primary }]}>
               <Text style={[styles.balanceLabel, { color: `${colors.primaryForeground}99` }]}>
                 Net Balance
               </Text>
@@ -101,7 +103,7 @@ export default function DashboardScreen() {
               </Text>
               <View style={styles.balanceRow}>
                 <View style={styles.balanceStat}>
-                  <Feather name="arrow-down-circle" size={14} color={`${colors.primaryForeground}99`} />
+                  <Feather name="arrow-down-circle" size={13} color={`${colors.primaryForeground}99`} />
                   <Text style={[styles.balanceStatLabel, { color: `${colors.primaryForeground}99` }]}>
                     Income
                   </Text>
@@ -111,7 +113,7 @@ export default function DashboardScreen() {
                 </View>
                 <View style={[styles.balanceDivider, { backgroundColor: `${colors.primaryForeground}33` }]} />
                 <View style={styles.balanceStat}>
-                  <Feather name="arrow-up-circle" size={14} color={`${colors.primaryForeground}99`} />
+                  <Feather name="arrow-up-circle" size={13} color={`${colors.primaryForeground}99`} />
                   <Text style={[styles.balanceStatLabel, { color: `${colors.primaryForeground}99` }]}>
                     Spent
                   </Text>
@@ -121,7 +123,7 @@ export default function DashboardScreen() {
                 </View>
                 <View style={[styles.balanceDivider, { backgroundColor: `${colors.primaryForeground}33` }]} />
                 <View style={styles.balanceStat}>
-                  <Feather name="percent" size={14} color={`${colors.primaryForeground}99`} />
+                  <Feather name="percent" size={13} color={`${colors.primaryForeground}99`} />
                   <Text style={[styles.balanceStatLabel, { color: `${colors.primaryForeground}99` }]}>
                     Saved
                   </Text>
@@ -132,9 +134,37 @@ export default function DashboardScreen() {
               </View>
             </View>
 
+            <View style={styles.quickRow}>
+              <StreakCard transactions={transactions ?? []} />
+              <TouchableOpacity
+                style={[styles.moodBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+                onPress={() => router.push("/mood-log")}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.moodEmoji}>😊</Text>
+                <Text style={[styles.moodBtnLabel, { color: colors.mutedForeground }]}>
+                  Log Mood
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {(transactions?.length ?? 0) > 0 && (
+              <View style={[styles.chartCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <View style={styles.chartHeader}>
+                  <Text style={[styles.chartTitle, { color: colors.foreground }]}>
+                    30-Day Spending
+                  </Text>
+                  <Text style={[styles.chartSub, { color: colors.mutedForeground }]}>
+                    daily expenses
+                  </Text>
+                </View>
+                <SpendingChart transactions={transactions ?? []} />
+              </View>
+            )}
+
             <View style={styles.metricsRow}>
               <MetricCard
-                label="Total Transactions"
+                label="Transactions"
                 value={String(dashboard?.transactionCount ?? 0)}
                 subtitle="all time"
               />
@@ -146,7 +176,9 @@ export default function DashboardScreen() {
             </View>
 
             {(dashboard?.categoryBreakdown?.length ?? 0) > 0 && (
-              <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <View
+                style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}
+              >
                 <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
                   Top Categories
                 </Text>
@@ -181,24 +213,30 @@ export default function DashboardScreen() {
               </View>
             )}
 
-            {(transactions?.length ?? 0) > 0 && (
-              <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                <View style={styles.sectionHeader}>
-                  <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
-                    Recent
-                  </Text>
+            {recentTransactions.length > 0 && (
+              <View
+                style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}
+              >
+                <View style={styles.sectionHeaderRow}>
+                  <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Recent</Text>
                   <TouchableOpacity onPress={() => router.push("/(tabs)/transactions")}>
                     <Text style={[styles.seeAll, { color: colors.primary }]}>See all</Text>
                   </TouchableOpacity>
                 </View>
-                {transactions!.map((txn) => (
-                  <TransactionRow key={txn.id} transaction={txn} />
+                {recentTransactions.map((txn) => (
+                  <TransactionRow
+                    key={txn.id}
+                    transaction={txn}
+                    onPress={() => router.push(`/transaction/${txn.id}`)}
+                  />
                 ))}
               </View>
             )}
 
             {!isLoading && (transactions?.length ?? 0) === 0 && (
-              <View style={[styles.emptyState, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <View
+                style={[styles.emptyState, { backgroundColor: colors.card, borderColor: colors.border }]}
+              >
                 <Feather name="inbox" size={32} color={colors.mutedForeground} />
                 <Text style={[styles.emptyTitle, { color: colors.foreground }]}>
                   No transactions yet
@@ -216,27 +254,16 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scroll: {
-    paddingHorizontal: 16,
-    gap: 12,
-  },
+  container: { flex: 1 },
+  scroll: { paddingHorizontal: 16, gap: 12 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 4,
   },
-  greeting: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-  },
-  title: {
-    fontSize: 28,
-    fontFamily: "Inter_700Bold",
-  },
+  greeting: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  title: { fontSize: 28, fontFamily: "Inter_700Bold" },
   addButton: {
     width: 40,
     height: 40,
@@ -244,57 +271,53 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  loader: {
-    marginTop: 60,
-  },
-  balanceCard: {
-    borderRadius: 16,
-    padding: 20,
-    gap: 4,
-  },
+  loader: { marginTop: 60 },
+  balanceCard: { borderRadius: 16, padding: 20, gap: 4 },
   balanceLabel: {
     fontSize: 12,
     fontFamily: "Inter_500Medium",
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  balanceAmount: {
-    fontSize: 36,
-    fontFamily: "Inter_700Bold",
-    marginBottom: 4,
-  },
-  balanceRow: {
-    flexDirection: "row",
+  balanceAmount: { fontSize: 36, fontFamily: "Inter_700Bold", marginBottom: 4 },
+  balanceRow: { flexDirection: "row", alignItems: "center", marginTop: 8 },
+  balanceStat: { flex: 1, alignItems: "center", gap: 2 },
+  balanceDivider: { width: 1, height: 32 },
+  balanceStatLabel: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  balanceStatValue: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  quickRow: { flexDirection: "row", gap: 10 },
+  moodBtn: {
+    flex: 0.55,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
     alignItems: "center",
-    marginTop: 8,
+    justifyContent: "center",
+    padding: 14,
+    gap: 4,
   },
-  balanceStat: {
-    flex: 1,
-    alignItems: "center",
-    gap: 2,
-  },
-  balanceDivider: {
-    width: 1,
-    height: 32,
-  },
-  balanceStatLabel: {
-    fontSize: 11,
-    fontFamily: "Inter_400Regular",
-  },
-  balanceStatValue: {
-    fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
-  },
-  metricsRow: {
-    flexDirection: "row",
+  moodEmoji: { fontSize: 26 },
+  moodBtnLabel: { fontSize: 11, fontFamily: "Inter_500Medium" },
+  chartCard: {
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: 16,
+    paddingBottom: 10,
     gap: 10,
   },
+  chartHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+  },
+  chartTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  chartSub: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  metricsRow: { flexDirection: "row", gap: 10 },
   section: {
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     overflow: "hidden",
   },
-  sectionHeader: {
+  sectionHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -309,10 +332,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 4,
   },
-  seeAll: {
-    fontSize: 13,
-    fontFamily: "Inter_500Medium",
-  },
+  seeAll: { fontSize: 13, fontFamily: "Inter_500Medium" },
   categoryRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -320,40 +340,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     gap: 12,
   },
-  categoryLeft: {
-    width: 100,
-    gap: 2,
-  },
-  categoryName: {
-    fontSize: 13,
-    fontFamily: "Inter_500Medium",
-  },
-  categoryCount: {
-    fontSize: 11,
-    fontFamily: "Inter_400Regular",
-  },
-  categoryRight: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  barTrack: {
-    flex: 1,
-    height: 6,
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-  barFill: {
-    height: 6,
-    borderRadius: 3,
-  },
-  categoryAmount: {
-    width: 48,
-    fontSize: 12,
-    fontFamily: "Inter_500Medium",
-    textAlign: "right",
-  },
+  categoryLeft: { width: 100, gap: 2 },
+  categoryName: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  categoryCount: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  categoryRight: { flex: 1, flexDirection: "row", alignItems: "center", gap: 8 },
+  barTrack: { flex: 1, height: 6, borderRadius: 3, overflow: "hidden" },
+  barFill: { height: 6, borderRadius: 3 },
+  categoryAmount: { width: 48, fontSize: 12, fontFamily: "Inter_500Medium", textAlign: "right" },
   emptyState: {
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
@@ -361,14 +354,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  emptyTitle: {
-    fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
-    marginTop: 4,
-  },
-  emptyText: {
-    fontSize: 14,
-    fontFamily: "Inter_400Regular",
-    textAlign: "center",
-  },
+  emptyTitle: { fontSize: 16, fontFamily: "Inter_600SemiBold", marginTop: 4 },
+  emptyText: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },
 });

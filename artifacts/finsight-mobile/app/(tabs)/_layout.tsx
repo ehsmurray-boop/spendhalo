@@ -20,6 +20,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: "creditcard", selected: "creditcard.fill" }} />
         <Label>Transactions</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="budget">
+        <Icon sf={{ default: "dollarsign.circle", selected: "dollarsign.circle.fill" }} />
+        <Label>Budget</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="insights">
         <Icon sf={{ default: "chart.bar", selected: "chart.bar.fill" }} />
         <Label>Insights</Label>
@@ -67,7 +71,7 @@ function ClassicTabLayout() {
           ) : null,
         tabBarLabelStyle: {
           fontFamily: "Inter_500Medium",
-          fontSize: 11,
+          fontSize: 10,
         },
       }}
     >
@@ -77,9 +81,9 @@ function ClassicTabLayout() {
           title: "Overview",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="house" tintColor={color} size={24} />
+              <SymbolView name="house" tintColor={color} size={22} />
             ) : (
-              <Feather name="home" size={22} color={color} />
+              <Feather name="home" size={21} color={color} />
             ),
         }}
       />
@@ -89,9 +93,21 @@ function ClassicTabLayout() {
           title: "Transactions",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="creditcard" tintColor={color} size={24} />
+              <SymbolView name="creditcard" tintColor={color} size={22} />
             ) : (
-              <Feather name="credit-card" size={22} color={color} />
+              <Feather name="credit-card" size={21} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="budget"
+        options={{
+          title: "Budget",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="dollarsign.circle" tintColor={color} size={22} />
+            ) : (
+              <Feather name="target" size={21} color={color} />
             ),
         }}
       />
@@ -101,9 +117,9 @@ function ClassicTabLayout() {
           title: "Insights",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="chart.bar" tintColor={color} size={24} />
+              <SymbolView name="chart.bar" tintColor={color} size={22} />
             ) : (
-              <Feather name="bar-chart-2" size={22} color={color} />
+              <Feather name="bar-chart-2" size={21} color={color} />
             ),
         }}
       />
@@ -113,9 +129,9 @@ function ClassicTabLayout() {
           title: "Settings",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="gearshape" tintColor={color} size={24} />
+              <SymbolView name="gearshape" tintColor={color} size={22} />
             ) : (
-              <Feather name="settings" size={22} color={color} />
+              <Feather name="settings" size={21} color={color} />
             ),
         }}
       />
