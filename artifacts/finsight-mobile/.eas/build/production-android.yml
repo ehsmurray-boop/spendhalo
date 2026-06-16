@@ -7,5 +7,3 @@ build:
         command: pnpm install --no-frozen-lockfile
     - eas/prebuild
     - eas/run_gradle
-    - eas/upload_artifact:
-        path: android/app/build/outputs/bundle/release/app-release.aab
