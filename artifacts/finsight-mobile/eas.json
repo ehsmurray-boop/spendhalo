@@ -18,6 +18,7 @@
       }
     },
     "production": {
+      "config": ".eas/build/production-android.yml",
       "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
