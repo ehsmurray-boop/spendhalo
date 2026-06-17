@@ -19,6 +19,9 @@
     },
     "production": {
       "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_DOMAIN": "spendhalo.app"
+      },
       "android": {
         "buildType": "app-bundle"
       },
